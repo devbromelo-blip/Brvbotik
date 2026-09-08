@@ -1,3 +1,2 @@
 aiogram>=3.20,<4
 aiohttp>=3.11,<4
-openai>=1.100,<3
