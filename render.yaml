@@ -13,6 +13,8 @@ services:
         value: "8668633782"
       - key: OWNER_USERNAME
         value: "devBroMelo"
+      - key: ALLOWED_CHAT_ID
+        value: "0"
       - key: AUTO_DELETE_SECONDS
         value: "20"
       - key: AUTO_MUTE_WARN_COUNT

@@ -34,6 +34,7 @@ except Exception:
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 OWNER_ID = int(os.getenv("OWNER_ID", "8668633782"))
 OWNER_USERNAME = os.getenv("OWNER_USERNAME", "devBroMelo").lstrip("@")
+ALLOWED_CHAT_ID = int(os.getenv("ALLOWED_CHAT_ID", "0"))
 
 PORT = int(os.getenv("PORT", "10000"))
 DB_PATH = os.getenv("DB_PATH", "bot.db")
@@ -367,9 +368,16 @@ async def cleanup_admin_command(message: Message, bot_reply: Message | None = No
     asyncio.create_task(_cleanup())
 
 
+def is_allowed_chat(chat_id: int) -> bool:
+    return ALLOWED_CHAT_ID == 0 or chat_id == ALLOWED_CHAT_ID
+
+
 async def ensure_active_message(message: Message) -> bool:
     if message.chat.type not in {"group", "supergroup"}:
         return True
+
+    if not is_allowed_chat(message.chat.id):
+        return False
 
     activated = get_chat_activation(message.chat.id)
     if activated is None:
@@ -579,6 +587,9 @@ async def bot_membership_update(event: ChatMemberUpdated):
     if event.chat.type not in {"group", "supergroup"}:
         return
 
+    if not is_allowed_chat(event.chat.id):
+        return
+
     old_status = event.old_chat_member.status
     new_status = event.new_chat_member.status
 
@@ -615,7 +626,7 @@ async def cmd_start(message: Message):
         return
     await message.answer(
         "🛡 <b>Advanced Moderator</b>\n\n"
-        "Команды: /rules, /help, /role, /staff, /warns\n"
+        "Команды: /rules, /help, /chatid, /role, /staff, /warns\n"
         "Админские: /warn, /mute, /unmute, /ban, /unban, /clearwarns\n"
         "Управление ролями: /setrole, /demote"
     )
@@ -655,6 +666,19 @@ async def cmd_rules(message: Message):
     if not await ensure_active_message(message):
         return
     await message.answer(RULES_TEXT)
+
+
+@dp.message(Command("chatid"))
+async def cmd_chatid(message: Message):
+    if message.chat.type not in {"group", "supergroup"}:
+        await message.answer("Эту команду нужно отправить в группе.")
+        return
+
+    await message.answer(
+        f"🆔 ID этой группы:\n<code>{message.chat.id}</code>\n\n"
+        f"Добавь в Render → Environment:\n"
+        f"<code>ALLOWED_CHAT_ID={message.chat.id}</code>"
+    )
 
 
 @dp.message(Command("role"))
