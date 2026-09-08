@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: bromelo-advanced-moderator
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    healthCheckPath: /health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: OWNER_ID
+        value: "8668633782"
+      - key: OWNER_USERNAME
+        value: "devBroMelo"
+      - key: AUTO_DELETE_SECONDS
+        value: "20"
+      - key: AUTO_MUTE_WARN_COUNT
+        value: "3"
+      - key: AUTO_MUTE_MINUTES
+        value: "5"
+      - key: FAMILY_MUTE_MINUTES
+        value: "120"
+      - key: AI_MODERATION
+        value: "false"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: "gpt-5.6-luna"
